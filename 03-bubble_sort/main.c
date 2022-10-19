@@ -31,7 +31,9 @@ void bubble_sort(int vetor[], int tamanho)
 
 int main()
 {
-    int vetor[] = {10, 3, 4, 2, 1, 5};
+    int vetor[] = {24, 66, 87, 43, 11, 27, 4, 2, 7, 8, 4, 5,
+     12, 53, 42, 22, 1, 5, 9, 13, 16, 23, 13, 7, 55, 67,
+     92, 22, 33, 27, 19};
     //Pegando o tamanho do array, só é possível onde o array é definido
     size_t tamanho = sizeof(vetor)/sizeof(vetor[0]);
     exibeVetor(vetor, tamanho);
