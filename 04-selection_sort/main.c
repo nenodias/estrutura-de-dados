@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 void exibeVetor(int vetor[], int tamanho)
 {
     printf("[");
@@ -34,8 +33,8 @@ void selection_sort(int vetor[], int tamanho)
 int main()
 {
     int vetor[] = {10, 3, 4, 2, 1, 5};
-    //Pegando o tamanho do array, só é possível onde o array é definido
-    size_t tamanho = sizeof(vetor)/sizeof(vetor[0]);
+    // Pegando o tamanho do array, só é possível onde o array é definido
+    size_t tamanho = sizeof(vetor) / sizeof(vetor[0]);
     exibeVetor(vetor, tamanho);
     selection_sort(vetor, tamanho);
     exibeVetor(vetor, tamanho);
