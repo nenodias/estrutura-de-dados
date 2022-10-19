@@ -23,21 +23,21 @@ TFila *criarFilaComValor(int valor)
     return registro;
 }
 
-void exibirFila(TFila *topo)
+void exibirFila(TFila *primeiro)
 {
-    if (topo != NULL)
+    if (primeiro != NULL)
     {
         printf("Fila[");
         while (1)
         {
-            printf("%d,", topo->valor);
-            if (topo->proximo == NULL)
+            printf("%d,", primeiro->valor);
+            if (primeiro->proximo == NULL)
             {
                 break;
             }
             else
             {
-                topo = topo->proximo;
+                primeiro = primeiro->proximo;
             }
         };
         printf("]\n");
@@ -48,22 +48,27 @@ void exibirFila(TFila *topo)
     }
 }
 
-TFila *enfileirar(TFila *final, int valor)
+TFila *enfileirar(TFila *ultimo, int valor)
 {
+    // Ao enfileirar, o valor adicionado vai para o ultimo da fila
     TFila *novo = criarFilaComValor(valor);
-    if(final != NULL){
-        final->proximo = novo;
+    if (ultimo != NULL)
+    {
+        // Se já existia alguém no final da fila, ele vai apontar para o novo, que será o ultimo da fila
+        ultimo->proximo = novo;
     }
     return novo;
 }
 
-TFila *desenfileirar(TFila *topo)
+TFila *desenfileirar(TFila *primeiro)
 {
-    if (topo != NULL)
+    if (primeiro != NULL)
     {
-        TFila *proximo = topo->proximo;
-        topo->proximo = NULL;
-        free(topo);
+        // Para desenfileirar recebemos o primeiro/começo da fila
+        TFila *proximo = primeiro->proximo;
+        primeiro->proximo = NULL;
+        free(primeiro);
+        // Retornamos o próximo da fila que estava em segundo lugar, e ele passa a ser o primeiro
         return proximo;
     }
     return NULL;
@@ -71,27 +76,29 @@ TFila *desenfileirar(TFila *topo)
 
 int main()
 {
-    TFila *topo = criarFilaComValor(1);
-    TFila *final = topo;
-    final = enfileirar(final, 2);
-    exibirFila(topo);
-    final = enfileirar(final, 3);
-    exibirFila(topo);
-    final = enfileirar(final, 4);
-    exibirFila(topo);
-    final = enfileirar(final, 5);
-    exibirFila(topo);
+    // Para poder controlar a fila precisamos de um ponteiro com o primeiro e o ultimo da fila
+    TFila *primeiro = criarFilaComValor(1);
+    // No início o primeiro da fila tambem e o ultimo
+    TFila *ultimo = primeiro;
+    ultimo = enfileirar(ultimo, 2);
+    exibirFila(primeiro);
+    ultimo = enfileirar(ultimo, 3);
+    exibirFila(primeiro);
+    ultimo = enfileirar(ultimo, 4);
+    exibirFila(primeiro);
+    ultimo = enfileirar(ultimo, 5);
+    exibirFila(primeiro);
 
-    topo = desenfileirar(topo);
-    exibirFila(topo);
-    topo = desenfileirar(topo);
-    exibirFila(topo);
-    topo = desenfileirar(topo);
-    exibirFila(topo);
-    topo = desenfileirar(topo);
-    exibirFila(topo);
-    topo = desenfileirar(topo);
-    exibirFila(topo);
+    primeiro = desenfileirar(primeiro);
+    exibirFila(primeiro);
+    primeiro = desenfileirar(primeiro);
+    exibirFila(primeiro);
+    primeiro = desenfileirar(primeiro);
+    exibirFila(primeiro);
+    primeiro = desenfileirar(primeiro);
+    exibirFila(primeiro);
+    primeiro = desenfileirar(primeiro);
+    exibirFila(primeiro);
 
     return 0;
 }
