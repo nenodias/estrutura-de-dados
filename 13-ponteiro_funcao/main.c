@@ -30,5 +30,6 @@ int main()
     } else {
         printf("Operação %c desconhecida.", opcao);
     }
+    printf("\nFim do programa!!!");
     return 0;
 }

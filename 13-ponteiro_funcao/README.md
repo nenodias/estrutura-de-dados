@@ -1,3 +1,5 @@
+### Explicando compilação
+
 ### Compilando a biblioteca em objeto
 gcc -c soma.c -o soma.o
 
@@ -6,3 +8,7 @@ ar rc libsoma.a soma.o
 
 ### Compilando o arquivo executável
 gcc main.c -o executavel -L. -lsoma
+
+
+#### Referências
+https://guialinux.uniriotec.br/biblioteca-c/
