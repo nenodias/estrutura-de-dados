@@ -17,21 +17,19 @@ void passagemDeValorPorReferencia(int *valor)
     printf("Depois: %d\n", *valor);
 }
 
-void exibeVetor(int vetor[])
+void exibeVetor(int vetor[], int tamanho)
 {
     printf("[");
-    // Pegando o tamanho do array do tipo int
-    int size = sizeof(vetor) / sizeof(int);
-    for (int i = 0; i <= size; i++)
+    for (int i = 0; i < tamanho; i++)
     {
         printf("%d,", vetor[i]);
     }
     printf("]\n");
 }
 
-void passagemDeArrayPorReferencia(int vetor[])
+void passagemDeArrayPorReferencia(int vetor[], int tamanho)
 {
-    exibeVetor(vetor);
+    exibeVetor(vetor, tamanho);
     vetor[0] = 0;
 }
 
@@ -47,13 +45,15 @@ int main()
     printf("Main: %d\n", valor);
 
     // Exemplo de que todo vetor/array é passado por referência
-    int vetor[] = {10, 20, 30};
+    int vetor[] = {10, 20, 30, 40};
+    //Pegando o tamanho do array, só é possível onde o array é definido
+    size_t tamanho = sizeof(vetor)/sizeof(vetor[0]);
     printf("Antes: passagemDeArrayPorReferencia\n");
-    passagemDeArrayPorReferencia(vetor);
+    passagemDeArrayPorReferencia(vetor, tamanho);
     printf("Depois: passagemDeArrayPorReferencia\n");
-    exibeVetor(vetor);
+    exibeVetor(vetor, tamanho);
     printf("Antes: passagemDeValorPorReferencia\n");
     passagemDeValorPorReferencia(vetor);
-    exibeVetor(vetor);
+    exibeVetor(vetor, tamanho);
     return 0;
 }
