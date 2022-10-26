@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include "soma.h"
 
 int main()
 {
+    setlocale(LC_ALL,"");
     char opcao = '\n';
     int a, b;
     printf("Digite o valor de a:");
