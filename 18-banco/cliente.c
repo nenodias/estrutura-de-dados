@@ -63,42 +63,38 @@ int connect_server(TServidor *servidor)
 void process(int sockfd)
 {
     char buff[MAX];
-    int n;
-    for (;;)
-    {
-        char leitura[50];
-        int conta;
-        char operacao;
-        float valor;
 
-        // Limpando o buffer
-        bzero(buff, sizeof(buff));
+    char leitura[50];
+    int conta;
+    char operacao;
+    float valor;
 
-        // Lendo os dados do usuario
-        printf("Qual a sua conta: \n");
-        scanf("%s", &leitura);
-        conta = atoi(leitura);
-        printf("Qual a operação(S/D)[Sacar/Depositar]: \n");
-        scanf("%s", &operacao);
-        printf("Qual o valor: \n");
-        scanf("%f", &valor);
-        printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
+    // Limpando o buffer
+    bzero(buff, sizeof(buff));
 
-        // Gravando dados no buffer a ser enviado para o servidor
-        sprintf(buff, "%i,%c,%.2f\n", conta, operacao, valor);
+    // Lendo os dados do usuario
+    printf("Qual a sua conta: \n");
+    scanf("%s", &leitura);
+    conta = atoi(leitura);
+    printf("Qual a operação(S/D)[Sacar/Depositar]: \n");
+    scanf("%s", &operacao);
+    printf("Qual o valor: \n");
+    scanf("%f", &valor);
+    printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
 
-        // Enviado buffer para servidor
-        write(sockfd, buff, sizeof(buff));
-        // Limpando o buffer
-        bzero(buff, sizeof(buff));
+    // Gravando dados no buffer a ser enviado para o servidor
+    sprintf(buff, "%i,%c,%.2f\n", conta, operacao, valor);
 
-        // Lendo dados do servidor
-        read(sockfd, buff, sizeof(buff));
+    // Enviado buffer para servidor
+    write(sockfd, buff, sizeof(buff));
+    // Limpando o buffer
+    bzero(buff, sizeof(buff));
 
-        // Exibindo a mensagem de resposta do servidor
-        printf("From Server : %s\n", buff);
-        break;
-    }
+    // Lendo dados do servidor
+    read(sockfd, buff, sizeof(buff));
+
+    // Exibindo a mensagem de resposta do servidor
+    printf("From Server : %s\n", buff);
 }
 
 int main()

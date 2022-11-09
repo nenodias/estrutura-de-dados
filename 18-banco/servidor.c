@@ -188,7 +188,6 @@ pthread_mutex_t mutex_conta;
 void process(int sockfd)
 {
     char buff[MAX_BUFFER];
-    int n;
 
     // Limpando o buffer
     bzero(buff, MAX_BUFFER);
