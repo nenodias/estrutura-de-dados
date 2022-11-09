@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#define MAX_CONTAS 5
 #define MAX_PROCESS 5
 #define MAX_BUFFER 80
 #define PORT 8080
@@ -167,7 +168,7 @@ TRetorno* depositar(TConta *conta, float valor)
     return 0;
 }
 
-TConta contas[MAX_PROCESS] = {
+TConta contas[MAX_CONTAS] = {
     {1, "Cliente 1\0", 100},
     {2, "Cliente 2\0", 150},
     {3, "Cliente 3\0", 200},
@@ -196,7 +197,7 @@ void process(int sockfd)
         float valor;
         sscanf(buff, "%d,%c,%f\n", &conta, &operacao, &valor);
         printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
-        if (conta >= 0 && conta < MAX_PROCESS)
+        if (conta >= 0 && conta < MAX_CONTAS)
         {
             TRetorno* ret;
             pthread_mutex_lock(&mutex_conta);
@@ -205,6 +206,9 @@ void process(int sockfd)
                 ret = sacar(&tconta, valor);
             } else if(operacao == 'D'){
                 ret = depositar(&tconta, valor);
+            } else {
+                ret = (TRetorno *)malloc(sizeof(TRetorno));
+                sprintf(ret->mensagem, "Operacao desconhecida\n");
             }
             pthread_mutex_unlock(&mutex_conta);
             printf(ret->mensagem);
@@ -226,14 +230,6 @@ void process(int sockfd)
 
 int main()
 {
-    // if(!sacar(&conta, 120)){
-    //     if(depositar(&conta, 120)){
-    //         saldo(&conta);
-    //         sacar(&conta, 120);
-    //         saldo(&conta);
-    //     }
-    // }
-
     // SERVER
     int connfd[MAX_PROCESS];
     struct sockaddr_in server, cli[5];
