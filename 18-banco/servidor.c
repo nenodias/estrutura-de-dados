@@ -125,7 +125,7 @@ struct TRetorno
 };
 typedef struct TRetorno TRetorno;
 
-TRetorno* saldo(TConta *conta)
+TRetorno *saldo(TConta *conta)
 {
     TRetorno *retorno = (TRetorno *)malloc(sizeof(TRetorno));
     retorno->operacao = 1;
@@ -133,7 +133,7 @@ TRetorno* saldo(TConta *conta)
     return retorno;
 }
 
-TRetorno* sacar(TConta *conta, float valor)
+TRetorno *sacar(TConta *conta, float valor)
 {
     TRetorno *retorno = (TRetorno *)malloc(sizeof(TRetorno));
     retorno->operacao = 0;
@@ -144,13 +144,15 @@ TRetorno* sacar(TConta *conta, float valor)
         sprintf(retorno->mensagem, "OPERACAO: SAQUE -> [%d, %s, %.2f] - %.2f = %.2f\nOPERACAO: OK", conta->numero, conta->nome, antigo, valor, conta->valor);
         retorno->operacao = 1;
         return retorno;
-    } else {
+    }
+    else
+    {
         sprintf(retorno->mensagem, "OPERACAO: SAQUE -> [%d, %s, %.2f] - %.2f\nOPERACAO: NEGADA", conta->numero, conta->nome, conta->valor, valor);
         return retorno;
     }
 }
 
-TRetorno* depositar(TConta *conta, float valor)
+TRetorno *depositar(TConta *conta, float valor)
 {
     TRetorno *retorno = (TRetorno *)malloc(sizeof(TRetorno));
     retorno->operacao = 0;
@@ -161,7 +163,9 @@ TRetorno* depositar(TConta *conta, float valor)
         sprintf(retorno->mensagem, "OPERACAO: DEPOSITO -> [%d, %s, %.2f] + %.2f = %.2f\nOPERACAO: OK", conta->numero, conta->nome, antigo, valor, conta->valor);
         retorno->operacao = 1;
         return retorno;
-    } else {
+    }
+    else
+    {
         sprintf(retorno->mensagem, "OPERACAO: DEPOSITO -> [%d, %s, %.2f] - %.2f\nOPERACAO: NEGADA", conta->numero, conta->nome, conta->valor, valor);
         return retorno;
     }
@@ -199,14 +203,19 @@ void process(int sockfd)
         printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
         if (conta >= 0 && conta < MAX_CONTAS)
         {
-            TRetorno* ret;
+            TRetorno *ret;
             pthread_mutex_lock(&mutex_conta);
             TConta tconta = contas[conta];
-            if(operacao == 'S'){
+            if (operacao == 'S')
+            {
                 ret = sacar(&tconta, valor);
-            } else if(operacao == 'D'){
+            }
+            else if (operacao == 'D')
+            {
                 ret = depositar(&tconta, valor);
-            } else {
+            }
+            else
+            {
                 ret = (TRetorno *)malloc(sizeof(TRetorno));
                 sprintf(ret->mensagem, "Operacao desconhecida\n");
             }

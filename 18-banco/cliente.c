@@ -47,7 +47,7 @@ int init_server(TServidor *servidor)
 
 int connect_server(TServidor *servidor)
 {
-    SA * socket = (SA *)&servidor->socket;
+    SA *socket = (SA *)&servidor->socket;
     if (connect(servidor->sockfd, socket, sizeof(struct sockaddr_in)) != 0)
     {
         printf("connection with the server failed...\n");
@@ -79,7 +79,7 @@ void func(int sockfd)
         printf("Qual o valor: \n");
         scanf("%f", &valor);
         printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
-        sprintf(buff,"%i,%c,%.2f\n",conta, operacao, valor);
+        sprintf(buff, "%i,%c,%.2f\n", conta, operacao, valor);
         write(sockfd, buff, sizeof(buff));
         bzero(buff, sizeof(buff));
         read(sockfd, buff, sizeof(buff));
@@ -96,7 +96,7 @@ int main()
 
     init_server(servidor);
     connect_server(servidor);
-    
+
     // function for chat
     func(servidor->sockfd);
 
