@@ -117,36 +117,66 @@ struct TConta
 };
 typedef struct TConta TConta;
 
-void saldo(TConta *conta)
+struct TRetorno
 {
-    printf("OPERACAO: SALDO -> [%d, %s, %.2f]\n", conta->numero, conta->nome, conta->valor);
+    int operacao;
+    char mensagem[80];
+};
+typedef struct TRetorno TRetorno;
+
+TRetorno* saldo(TConta *conta)
+{
+    TRetorno *retorno = (TRetorno *)malloc(sizeof(TRetorno));
+    retorno->operacao = 1;
+    sprintf(retorno->mensagem, "OPERACAO: SALDO -> [%d, %s, %.2f]\n", conta->numero, conta->nome, conta->valor);
+    return retorno;
 }
 
-int sacar(TConta *conta, float valor)
+TRetorno* sacar(TConta *conta, float valor)
 {
-    printf("OPERACAO: SAQUE -> [%d, %s, %.2f] - %.2f\n", conta->numero, conta->nome, conta->valor, valor);
+    TRetorno *retorno = (TRetorno *)malloc(sizeof(TRetorno));
+    retorno->operacao = 0;
     if (valor >= 0 && conta->valor >= valor)
     {
+        float antigo = conta->valor;
         conta->valor -= valor;
-        printf("OPERACAO: SAQUE -> [%d, %s, %.2f] - OK\n", conta->numero, conta->nome, conta->valor);
-        return 1;
+        sprintf(retorno->mensagem, "OPERACAO: SAQUE -> [%d, %s, %.2f] - %.2f = %.2f\nOPERACAO: OK", conta->numero, conta->nome, antigo, valor, conta->valor);
+        retorno->operacao = 1;
+        return retorno;
+    } else {
+        sprintf(retorno->mensagem, "OPERACAO: SAQUE -> [%d, %s, %.2f] - %.2f\nOPERACAO: NEGADA", conta->numero, conta->nome, conta->valor, valor);
+        return retorno;
     }
-    printf("OPERACAO: SAQUE -> [%d, %s, %.2f] - NEGADA\n", conta->numero, conta->nome, conta->valor);
+}
+
+TRetorno* depositar(TConta *conta, float valor)
+{
+    TRetorno *retorno = (TRetorno *)malloc(sizeof(TRetorno));
+    retorno->operacao = 0;
+    if (valor >= 0)
+    {
+        float antigo = conta->valor;
+        conta->valor += valor;
+        sprintf(retorno->mensagem, "OPERACAO: DEPOSITO -> [%d, %s, %.2f] + %.2f = %.2f\nOPERACAO: OK", conta->numero, conta->nome, antigo, valor, conta->valor);
+        retorno->operacao = 1;
+        return retorno;
+    } else {
+        sprintf(retorno->mensagem, "OPERACAO: DEPOSITO -> [%d, %s, %.2f] - %.2f\nOPERACAO: NEGADA", conta->numero, conta->nome, conta->valor, valor);
+        return retorno;
+    }
     return 0;
 }
 
-int depositar(TConta *conta, float valor)
-{
-    printf("OPERACAO: DEPOSITO -> [%d, %s, %.2f] - %.2f\n", conta->numero, conta->nome, conta->valor, valor);
-    if (valor >= 0)
-    {
-        conta->valor += valor;
-        printf("OPERACAO: DEPOSITO -> [%d, %s, %.2f] - OK\n", conta->numero, conta->nome, conta->valor);
-        return 1;
-    }
-    printf("OPERACAO: DEPOSITO -> [%d, %s, %.2f] - NEGADA\n", conta->numero, conta->nome, conta->valor);
-    return 0;
-}
+TConta contas[MAX_PROCESS] = {
+    {1, "Cliente 1\0", 100},
+    {2, "Cliente 2\0", 150},
+    {3, "Cliente 3\0", 200},
+    {4, "Cliente 4\0", 250},
+    {5, "Cliente 5\0", 0},
+};
+
+// MUTEX
+pthread_mutex_t mutex_conta;
 
 // PROCESS
 
@@ -161,10 +191,27 @@ void process(int sockfd)
 
         // read the message from client and copy it in buffer
         read(sockfd, buff, sizeof(buff));
-        int numero = atoi(buff);
-        printf("Numero: %d\n", numero);
-        if (numero >= 0 && numero < MAX_PROCESS)
+        int conta;
+        char operacao;
+        float valor;
+        sscanf(buff, "%d,%c,%f\n", &conta, &operacao, &valor);
+        printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
+        if (conta >= 0 && conta < MAX_PROCESS)
         {
+            TRetorno* ret;
+            pthread_mutex_lock(&mutex_conta);
+            TConta tconta = contas[conta];
+            if(operacao == 'S'){
+                ret = sacar(&tconta, valor);
+            } else if(operacao == 'D'){
+                ret = depositar(&tconta, valor);
+            }
+            pthread_mutex_unlock(&mutex_conta);
+            printf(ret->mensagem);
+            printf("\n");
+            strcpy(buff, ret->mensagem);
+            write(sockfd, buff, sizeof(buff));
+            bzero(buff, MAX_BUFFER);
         }
         else
         {
@@ -173,37 +220,9 @@ void process(int sockfd)
             bzero(buff, MAX_BUFFER);
             break;
         }
-
-        // print buffer which contains the client contents
-        printf("From client: %s", buff);
-        bzero(buff, MAX_BUFFER);
-        n = 0;
-        // copy server message in the buffer
-        while ((buff[n++] = getchar()) != '\n')
-            ;
-
-        // and send that buffer to client
-        write(sockfd, buff, sizeof(buff));
-
-        // if msg contains "Exit" then server exit and chat ended.
-        if (strncmp("exit", buff, 4) == 0)
-        {
-            printf("Server Exit...\n");
-            break;
-        }
+        break;
     }
 }
-
-// MUTEX
-pthread_mutex_t mutex_conta;
-
-TConta contas[MAX_PROCESS] = {
-    {1, "Cliente 1\0", 100},
-    {2, "Cliente 2\0", 150},
-    {3, "Cliente 3\0", 200},
-    {4, "Cliente 4\0", 250},
-    {5, "Cliente 5\0", 0},
-};
 
 int main()
 {

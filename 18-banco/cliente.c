@@ -66,19 +66,25 @@ void func(int sockfd)
     int n;
     for (;;)
     {
+        char leitura[50];
+        int conta;
+        char operacao;
+        float valor;
         bzero(buff, sizeof(buff));
-        printf("Qual a sua conta: ");
-        n = 0;
-        while ((buff[n++] = getchar()) != '\n')
-            ;
+        printf("Qual a sua conta: \n");
+        scanf("%s", &leitura);
+        conta = atoi(leitura);
+        printf("Qual a operação(S/D)[Sacar/Depositar]: \n");
+        scanf("%s", &operacao);
+        printf("Qual o valor: \n");
+        scanf("%f", &valor);
+        printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
+        sprintf(buff,"%i,%c,%.2f\n",conta, operacao, valor);
         write(sockfd, buff, sizeof(buff));
         bzero(buff, sizeof(buff));
         read(sockfd, buff, sizeof(buff));
         printf("From Server : %s", buff);
-        if (strncmp(buff, "Conta invalida", 4) == 0)
-        {
-            break;
-        }
+        break;
     }
 }
 
