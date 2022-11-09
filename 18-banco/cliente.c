@@ -96,7 +96,7 @@ void process(int sockfd)
         read(sockfd, buff, sizeof(buff));
 
         // Exibindo a mensagem de resposta do servidor
-        printf("From Server : %s", buff);
+        printf("From Server : %s\n", buff);
         break;
     }
 }

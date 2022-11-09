@@ -210,15 +210,15 @@ void process(int sockfd)
         // Fazendo lock para evitar operacoes concorrentes e causa um estado invalido
         pthread_mutex_lock(&mutex_conta);
 
-        // Recuperando a conta pelo indice
-        TConta tconta = contas[conta];
+        // Recuperando a conta pelo indice e pegando o endereco de memoria da conta
+        TConta *tconta = &contas[conta];
         if (operacao == 'S')
         {
-            ret = sacar(&tconta, valor);
+            ret = sacar(tconta, valor);
         }
         else if (operacao == 'D')
         {
-            ret = depositar(&tconta, valor);
+            ret = depositar(tconta, valor);
         }
         else
         {
