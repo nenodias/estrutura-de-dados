@@ -60,7 +60,7 @@ int connect_server(TServidor *servidor)
     return 1;
 }
 
-void func(int sockfd)
+void process(int sockfd)
 {
     char buff[MAX];
     int n;
@@ -70,7 +70,11 @@ void func(int sockfd)
         int conta;
         char operacao;
         float valor;
+
+        // Limpando o buffer
         bzero(buff, sizeof(buff));
+
+        // Lendo os dados do usuario
         printf("Qual a sua conta: \n");
         scanf("%s", &leitura);
         conta = atoi(leitura);
@@ -79,10 +83,19 @@ void func(int sockfd)
         printf("Qual o valor: \n");
         scanf("%f", &valor);
         printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
+
+        // Gravando dados no buffer a ser enviado para o servidor
         sprintf(buff, "%i,%c,%.2f\n", conta, operacao, valor);
+
+        // Enviado buffer para servidor
         write(sockfd, buff, sizeof(buff));
+        // Limpando o buffer
         bzero(buff, sizeof(buff));
+
+        // Lendo dados do servidor
         read(sockfd, buff, sizeof(buff));
+
+        // Exibindo a mensagem de resposta do servidor
         printf("From Server : %s", buff);
         break;
     }
@@ -97,8 +110,8 @@ int main()
     init_server(servidor);
     connect_server(servidor);
 
-    // function for chat
-    func(servidor->sockfd);
+    // funcao para processar
+    process(servidor->sockfd);
 
     // close the socket
     close(servidor->sockfd);

@@ -140,7 +140,7 @@ TRetorno *sacar(TConta *conta, float valor)
     if (valor >= 0 && conta->valor >= valor)
     {
         float antigo = conta->valor;
-        conta->valor -= valor;
+        conta->valor = conta->valor - valor;
         sprintf(retorno->mensagem, "OPERACAO: SAQUE -> [%d, %s, %.2f] - %.2f = %.2f\nOPERACAO: OK", conta->numero, conta->nome, antigo, valor, conta->valor);
         retorno->operacao = 1;
         return retorno;
@@ -159,7 +159,7 @@ TRetorno *depositar(TConta *conta, float valor)
     if (valor >= 0)
     {
         float antigo = conta->valor;
-        conta->valor += valor;
+        conta->valor = conta->valor + valor;
         sprintf(retorno->mensagem, "OPERACAO: DEPOSITO -> [%d, %s, %.2f] + %.2f = %.2f\nOPERACAO: OK", conta->numero, conta->nome, antigo, valor, conta->valor);
         retorno->operacao = 1;
         return retorno;
@@ -189,51 +189,69 @@ void process(int sockfd)
 {
     char buff[MAX_BUFFER];
     int n;
-    // infinite loop for chat
-    for (;;)
-    {
-        bzero(buff, MAX_BUFFER);
 
-        // read the message from client and copy it in buffer
-        read(sockfd, buff, sizeof(buff));
-        int conta;
-        char operacao;
-        float valor;
-        sscanf(buff, "%d,%c,%f\n", &conta, &operacao, &valor);
-        printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
-        if (conta >= 0 && conta < MAX_CONTAS)
+    // Limpando o buffer
+    bzero(buff, MAX_BUFFER);
+
+    // lendo mensagem recebida do cliente/usuario
+    read(sockfd, buff, sizeof(buff));
+
+    int conta;
+    char operacao;
+    float valor;
+
+    // lendo valores para as variaveis
+    sscanf(buff, "%d,%c,%f\n", &conta, &operacao, &valor);
+    // Exibindo os valores recuperados
+    printf("Conta: %i\nOperação: %c\nValor: %.2f\n", conta, operacao, valor);
+    if (conta >= 0 && conta < MAX_CONTAS)
+    {
+        TRetorno *ret;
+        // Fazendo lock para evitar operacoes concorrentes e causa um estado invalido
+        pthread_mutex_lock(&mutex_conta);
+
+        // Recuperando a conta pelo indice
+        TConta tconta = contas[conta];
+        if (operacao == 'S')
         {
-            TRetorno *ret;
-            pthread_mutex_lock(&mutex_conta);
-            TConta tconta = contas[conta];
-            if (operacao == 'S')
-            {
-                ret = sacar(&tconta, valor);
-            }
-            else if (operacao == 'D')
-            {
-                ret = depositar(&tconta, valor);
-            }
-            else
-            {
-                ret = (TRetorno *)malloc(sizeof(TRetorno));
-                sprintf(ret->mensagem, "Operacao desconhecida\n");
-            }
-            pthread_mutex_unlock(&mutex_conta);
-            printf(ret->mensagem);
-            printf("\n");
-            strcpy(buff, ret->mensagem);
-            write(sockfd, buff, sizeof(buff));
-            bzero(buff, MAX_BUFFER);
+            ret = sacar(&tconta, valor);
+        }
+        else if (operacao == 'D')
+        {
+            ret = depositar(&tconta, valor);
         }
         else
         {
-            strcpy(buff, "Conta invalida\0");
-            write(sockfd, buff, sizeof(buff));
-            bzero(buff, MAX_BUFFER);
-            break;
+            // Tratando o possivel caso de uma operacao invalida ser recebida pelo cliente
+            ret = (TRetorno *)malloc(sizeof(TRetorno));
+            sprintf(ret->mensagem, "Operacao desconhecida\n");
         }
-        break;
+
+        // Liberando o lock
+        pthread_mutex_unlock(&mutex_conta);
+
+        // Exibindo a mensagem de retorno que sera enviada para o cliente
+        printf(ret->mensagem);
+        printf("\n");
+        // Copiando o retorno para o buffer
+        strcpy(buff, ret->mensagem);
+
+        // Enviando a resposta para o cliente
+        write(sockfd, buff, sizeof(buff));
+
+        // Limpando o buffer
+        bzero(buff, MAX_BUFFER);
+    }
+    else
+    {
+        // Copiando o retorno para o buffer
+        strcpy(buff, "Conta invalida\0");
+
+        // Enviando a resposta para o cliente
+        write(sockfd, buff, sizeof(buff));
+
+        // Limpando o buffer
+        bzero(buff, MAX_BUFFER);
     }
 }
 
